@@ -26,6 +26,19 @@ app.get("/", (req, res) => {
   });
 });
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.log(err.stack);
+  res
+    .status(500)
+    .json({ message: "Something went wrong!", error: err.message });
+});
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ message: `Route ${req.originalUrl} not found` });
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
