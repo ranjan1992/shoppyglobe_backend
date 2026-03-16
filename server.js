@@ -1,9 +1,15 @@
 const express = require("express");
+const connectDB = require("./config/db");
 
+const dotenv = require("dotenv");
+dotenv.config();
+
+connectDB();
 const app = express();
 
 app.use(express.json());
 
+// Root Route
 app.get("/", (req, res) => {
   res.json({
     message: "🛒 ShoppyGlobe API is running!",
