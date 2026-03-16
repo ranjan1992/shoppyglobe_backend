@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { sxpiration: "7d" });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 // @route   POST /register
@@ -12,6 +12,7 @@ const generateToken = (id) => {
 // @access  Public
 
 router.post("/register", async (req, res) => {
+  const { username, email, password } = req.body;
   try {
     // Validate the required fields
     if (!username || !email || !password) {
@@ -41,3 +42,5 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
+module.exports = router;
