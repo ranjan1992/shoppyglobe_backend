@@ -11,7 +11,7 @@ app.use(express.json());
 
 // Routes
 app.use("/", require("./routes/authRoutes"));
-
+app.use("/cart", require("./routes/cartRoutes"));
 app.use("/products", require("./routes/productRoutes"));
 
 // Root Route
