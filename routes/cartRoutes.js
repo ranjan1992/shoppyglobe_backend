@@ -152,4 +152,44 @@ router.put("/:productId", async (req, res) => {
   }
 });
 
+// @route    DELETE  /cart/:productId
+// @desc     Remove a product from the cart
+// @access   Private
+router.delete("/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "Invalid productId format" });
+    }
+
+    const cart = await Cart.findOne({ user: req.user._id });
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    const initialLength = cart.items.length;
+    cart.items = cart.items.filter(
+      (item) => item.product.toString() !== productId,
+    );
+
+    if (cart.items.length === initialLength) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+
+    await cart.save();
+
+    await cart.populate("items.product", "name price description");
+
+    res.status(200).json({ message: "Product removed from cart", cart });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error ",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;
