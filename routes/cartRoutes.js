@@ -97,4 +97,59 @@ router.post("/", async (req, res) => {
   }
 });
 
+// @route    PUT  /cart/:productId
+// @desc     Update the quantity of the product in the cart
+// @access   Private
+
+router.put("/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { quantity } = req.body;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "Invalid product format" });
+    }
+
+    // Check product exists or not
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check stock availability
+    if (quantity > product.stock) {
+      return res
+        .status(400)
+        .json({ message: `Only ${product.stock} items in stock` });
+    }
+
+    const cart = await Cart.findOne({ user: req.user_id });
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    // Finding items in the cart
+    const item = cart.items.find(
+      (item) => item.product.toString() === productId,
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: "Product not found in the cart" });
+    }
+
+    // Update quantity
+    item.quantity = quantity;
+    await cart.save();
+
+    await cart.populate("items.product", "name price description");
+    res.status(200).json({ message: "Cart updated successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Server error updating cart", error: error.message });
+  }
+});
+
 module.exports = router;
